@@ -1,0 +1,35 @@
+{
+  "name": "derpbot",
+  "version": "0.1.0",
+  "description": "Just Another Discord Bot",
+  "main": "app.js",
+  "engines": {
+    "node": "8.1.4"
+  },
+  "scripts": {
+    "test": "xo && ava"
+  },
+  "author": "Neranjen",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^11.1.0",
+    "erlpack": "github:hammerandchisel/erlpack",
+    "ffmpeg-binaries": "^3.2.2-3",
+    "libsodium-wrappers": "^0.5.2",
+    "node-opus": "^0.2.6",
+    "pretty-seconds": "^0.2.1",
+    "uws": "^8.14.0",
+    "winston": "^2.3.1",
+    "youtube-search": "^1.0.10",
+    "ytdl-core": "^0.14.4"
+  },
+  "xo": {
+    "space": true,
+    "semicolon": false
+  },
+  "devDependencies": {
+    "ava": "^0.21.0",
+    "nyc": "^11.0.3",
+    "xo": "^0.18.2"
+  }
+}

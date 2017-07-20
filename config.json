@@ -1,0 +1,9 @@
+{
+  "bot": {
+    "token": "",
+    "prefix": "^"
+  },
+  "log": {
+    "level": "silly"
+  }
+}
