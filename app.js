@@ -25,6 +25,7 @@ const bot = new discord.Client()
 bot.on('ready', () => {
   logger.log('info', 'bot ready')
   logger.log('verbose', 'Serving %d users in %d guilds', bot.users.size, bot.guilds.size)
+  logger.log('info', require('ffmpeg-binaries').ffmpegPath())
 })
 
 bot.on('message', message => {
