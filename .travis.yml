@@ -1,0 +1,12 @@
+language: node_js
+node_js:
+  - "8"
+sudo: false
+dist: trusty
+install:
+  - npm install
+script:
+  - xo
+cache:
+  directories:
+    - "node_modules"
