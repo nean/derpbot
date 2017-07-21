@@ -2,7 +2,14 @@
 const discord = require('discord.js')
 const winston = require('winston')
 const botUtils = require('./util.js')
-const config = require('./config.json')
+
+let config
+
+if (process.env.NODE_ENV === 'production') {
+  config = require('./config/config-prod.json')
+} else {
+  config = require('./config/config-dev.json')
+}
 
 const prefix = config.bot.prefix
 
@@ -11,10 +18,10 @@ let dispatcher = null
 const logger = new winston.Logger({
   transports: [
     new winston.transports.Console({
-      colorize: true
+      colorize: config.log.colorize
     })
   ],
-  level: process.env.LOG_LEVEL || config.log.level
+  level: config.log.level
 })
 
 config.bot.token = process.env.BOT_TOKEN

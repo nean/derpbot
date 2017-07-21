@@ -1,0 +1,10 @@
+{
+  "bot": {
+    "token": "",
+    "prefix": "/"
+  },
+  "log": {
+    "level": "silly",
+    "colorize": true
+  }
+}

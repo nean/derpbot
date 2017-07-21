@@ -4,6 +4,7 @@
     "prefix": "^"
   },
   "log": {
-    "level": "silly"
+    "level": "info",
+    "colorize": false
   }
 }
