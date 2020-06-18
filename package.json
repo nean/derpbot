@@ -1,11 +1,11 @@
 {
   "name": "derpbot",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Just Another Discord Bot",
   "main": "app.js",
   "engines": {
-    "node": "8.2.1",
-    "npm": "5.3.0"
+    "node": "12.17.0",
+    "npm": "6.14.5"
   },
   "scripts": {
     "test": "xo && ava"
@@ -13,24 +13,26 @@
   "author": "Neranjen",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^11.1.0",
-    "erlpack": "github:hammerandchisel/erlpack",
-    "ffmpeg-binaries": "^3.2.2-3",
-    "libsodium-wrappers": "^0.5.2",
-    "node-opus": "^0.2.6",
-    "pretty-seconds": "^0.2.1",
-    "uws": "^8.14.0",
-    "winston": "^2.3.1",
-    "youtube-search": "^1.0.10",
-    "ytdl-core": "^0.14.4"
+    "@discordjs/opus": "^0.3.2",
+    "bufferutil": "^4.0.1",
+    "discord-ytdl-core": "^4.0.0",
+    "discord.js": "^12.2.0",
+    "erlpack": "github:discordapp/erlpack",
+    "ffmpeg-static": "^4.2.4",
+    "pretty-seconds": "^1.0.0",
+    "sodium": "^3.0.2",
+    "utf-8-validate": "^5.0.2",
+    "winston": "^3.2.1",
+    "youtube-search": "^1.1.4",
+    "zlib-sync": "^0.1.7"
   },
   "xo": {
     "space": true,
     "semicolon": false
   },
   "devDependencies": {
-    "ava": "^0.21.0",
-    "nyc": "^11.0.3",
-    "xo": "^0.18.2"
+    "ava": "^3.9.0",
+    "nyc": "^15.1.0",
+    "xo": "^0.32.0"
   }
 }

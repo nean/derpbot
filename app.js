@@ -2,6 +2,7 @@
 const discord = require('discord.js')
 const winston = require('winston')
 const botUtils = require('./util.js')
+const { format } = require('winston')
 
 let config
 
@@ -15,11 +16,13 @@ const prefix = config.bot.prefix
 
 let dispatcher = null
 
-const logger = new winston.Logger({
+const logger = new winston.createLogger({
+  format: format.combine(
+    format.splat(),
+    format.simple()
+  ),
   transports: [
-    new winston.transports.Console({
-      colorize: config.log.colorize
-    })
+    new winston.transports.Console()
   ],
   level: config.log.level
 })
@@ -32,10 +35,9 @@ const bot = new discord.Client()
 bot.on('ready', () => {
   logger.log('info', 'bot ready')
   logger.log('verbose', 'Serving %d users in %d guilds', bot.users.size, bot.guilds.size)
-  logger.log('info', require('ffmpeg-binaries').ffmpegPath())
 })
 
-bot.on('message', message => {
+bot.on('message', async message => {
   // Check if the author is another bot
   if (message.author.bot) {
     // Bots sending direct messages ?!
@@ -118,8 +120,8 @@ bot.on('message', message => {
       },
       timestamp: new Date(),
       fields: [
-          {name: 'Servers', value: bot.guilds.size, inline: true},
-          {name: 'Users', value: bot.users.size, inline: true}
+          {name: 'Servers', value: bot.guilds.cache.size, inline: true},
+          {name: 'Users', value: bot.users.cache.size, inline: true}
       ],
       footer: {text: `Online for ${botUtils.getUptime()}`}
     }})
@@ -135,7 +137,10 @@ bot.on('message', message => {
     }
       // If user not found using mentions try username
     if (!user) {
-      user = message.guild.members.find(v => v.user.username.toLowerCase() === args.join(' ').toLowerCase())
+      try {
+        user = await message.guild.members.fetch({auery: args.join(' '), limit: 1})
+        user = user.first()
+      } catch (e) {}
     }
       // No luck send not found message
     if (!user) {
@@ -160,34 +165,34 @@ bot.on('message', message => {
       fields: [
           {name: 'Id', value: user.user.id, inline: true},
           {name: 'Joined At', value: user.joinedAt.toDateString(), inline: true},
-          {name: 'Roles', value: getRolesString(user.roles)}
+          {name: 'Roles', value: getRolesString(user.roles.cache)}
       ]
     }})
     return
   }
 
-  if (command === 'summon') {
-      // Only try to join the sender's voice channel if they are in one themselves
-    const m = message.channel.send(':mega: attempting to join voice channel ...')
-    if (message.member.voiceChannel) {
-      message.member.voiceChannel.join()
-          .then(() => {
-            m.then(message => message.edit(':mega: I have successfully connected to the channel!'))
-          })
-          .catch(err => {
-            logger.log('error', err)
-            m.then(message => message.edit(':mega: Error encountered.\nMessage: ```' + err.message + '```'))
-          })
+  if (command === 'summon' || command === 'join') {
+    // Only try to join the sender's voice channel if they are in one themselves
+    const m = await message.channel.send(':mega: attempting to join voice channel ...')
+    if (message.member.voice.channel) {
+      try {
+        const connection = await message.member.voice.channel.join();
+        m.edit(':mega: I have successfully connected to the channel!')
+      } catch(e) {
+        m.edit(':mega: Error encountered.\nMessage: ```' + err.message + '```')
+      }
       return
     }
+
+    console.log(bot.voice.voiceChannels)
 
         // If already in a channel
-    if (bot.voiceConnections.get(message.channel.guild.id)) {
-      m.then(message => message.edit(':mega: Already in a voice channel.'))
+    if (bot.voice.connections.get(message.channel.guild.id)) {
+      m.edit(':mega: Already in a voice channel.')
       return
     }
 
-    let voiceChannels = message.guild.channels.sort((a, b) => {
+    let voiceChannels = message.guild.channels.cache.sort((a, b) => {
       return a.position > b.position
     }).filter(channel => {
       if (channel.type === 'voice' && channel.joinable) {
@@ -203,47 +208,49 @@ bot.on('message', message => {
     })
 
     if (voiceChannels.size === 0) {
-      m.then(message => message.edit(':mega: No joinable Voice Channels found!'))
+      m.edit(':mega: No joinable Voice Channels found!')
       return
     }
 
     voiceChannels = voiceChannels.array()
       // Can simplify
-    const attemptJoin = (i, attemptJoin) => {
-      voiceChannels[i].join().then(() => {
-        m.then(message => message.edit(':mega: I have successfully connected to the channel!'))
-      }).catch(err => {
+    const attemptJoin = async (i, attemptJoin) => {
+      try {
+        await voiceChannels[i].join();
+        m.edit(':mega: I have successfully connected to the channel!')
+      } catch (err) {
         logger.log('error', err)
         if (i === voiceChannels.length - 1) {
-          m.then(message => message.edit(':mega: No joinable Voice Channels found!'))
+          m.edit(':mega: No joinable Voice Channels found!')
         } else {
           attemptJoin(i + 1)
         }
-      })
+      }
     }
-    attemptJoin(0)
+
+    await attemptJoin(0)
     return
   }
 
   // Must simplify
   if (command === 'play') {
-    if (bot.voiceConnections.size === 0) {
+    if (bot.voice.connections.size === 0) {
       message.channel.send(':mega: Invite the bot to a voice channel first!')
       return
     }
-    const vc = bot.voiceConnections.get(message.channel.guild.id)
+    const vc = bot.voice.connections.get(message.channel.guild.id)
     const url = args[0]
-    const ytdl = require('ytdl-core')
-    const streamOptions = {seek: 0, volume: 0.05}
+    const ytdl = require('discord-ytdl-core')
+    const streamOptions = {seek: 0, type: "opus"}
     ytdl.getInfo(url).then(() => {
       let stream
       try {
-        stream = ytdl(url, {filter: 'audioonly'})
+        stream = ytdl(url, {filter: 'audioonly', opusEncoded: true, encoderArgs: ['-af', 'bass=g=10,dynaudnorm=f=200']})
       } catch (e) {
         message.channel.send(':mega: cant play this shit ' + url)
         return
       }
-      dispatcher = vc.playStream(stream, streamOptions)
+      dispatcher = vc.play(stream, streamOptions)
     }).catch(err => {
       logger.log('error', err)
       const ytseatch = require('youtube-search')
@@ -261,13 +268,13 @@ bot.on('message', message => {
           return
         }
         try {
-          stream = ytdl(results[0].link, {filter: 'audioonly'})
+          stream = ytdl(results[0].link, {filter: 'audioonly', opusEncoded: true, encoderArgs: ['-af', 'bass=g=10,dynaudnorm=f=200']})
         } catch (e) {
           message.channel.send(':mega: cant play this shit ' + url)
           return
         }
         message.channel.send(':mega: Playing ' + results[0].link)
-        dispatcher = vc.playStream(stream, streamOptions)
+        dispatcher = vc.play(stream, streamOptions)
       })
     })
     return
