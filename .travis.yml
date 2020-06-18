@@ -1,7 +1,7 @@
 language: node_js
 node_js:
   - "14"
-sudo: false
+os: "linux"
 dist: bionic
 install:
   - npm install
