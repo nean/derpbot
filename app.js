@@ -1,8 +1,8 @@
 'use strict'
 const discord = require('discord.js')
-const winston = require('winston')
+const {createLogger: CreateLogger, transports: {Console: ConsoleTransport}} = require('winston')
 const botUtils = require('./util.js')
-const { format } = require('winston')
+const {format} = require('winston')
 
 let config
 
@@ -12,17 +12,17 @@ if (process.env.NODE_ENV === 'production') {
   config = require('./config/config-dev.json')
 }
 
-const prefix = config.bot.prefix
+const {prefix} = config.bot
 
 let dispatcher = null
 
-const logger = new winston.createLogger({
+const logger = new CreateLogger({
   format: format.combine(
     format.splat(),
     format.simple()
   ),
   transports: [
-    new winston.transports.Console()
+    new ConsoleTransport()
   ],
   level: config.log.level
 })
@@ -48,16 +48,17 @@ bot.on('message', async message => {
         content: message.content
       })
     }
+
     // Don't reply to other bots which includes self
     return
   }
 
-  const msgPrefixed = message.content.indexOf(prefix) === 0
-  const msgMentioned = message.content.indexOf(bot.user.toString()) === 0
-  const msgNicknameMentioned = message.content.indexOf(`<@!${bot.user.id}>`) === 0
+  const messagePrefixed = message.content.indexOf(prefix) === 0
+  const messageMentioned = message.content.indexOf(bot.user.toString()) === 0
+  const messageNicknameMentioned = message.content.indexOf(`<@!${bot.user.id}>`) === 0
 
   // If the message is not prefixed don't care about the message
-  if (!(msgPrefixed || msgMentioned || msgNicknameMentioned)) {
+  if (!(messagePrefixed || messageMentioned || messageNicknameMentioned)) {
     return
   }
 
@@ -73,12 +74,12 @@ bot.on('message', async message => {
   let args
   let type
 
-  if (msgPrefixed) {
-    args = message.content.trim().substr(prefix.length).split(' ')
+  if (messagePrefixed) {
+    args = message.content.trim().slice(prefix.length).split(' ')
     command = args.shift().toLowerCase()
     command = (command === '') ? false : command
     type = 'prefix'
-  } else if (msgMentioned || msgNicknameMentioned) {
+  } else if (messageMentioned || messageNicknameMentioned) {
     args = message.content.split(' ')
     args.shift() // Remove the mention
     const remaining = args.join(' ')
@@ -87,6 +88,7 @@ bot.on('message', async message => {
     command = command ? command.toLowerCase() : false
     type = 'mention'
   }
+
   args = args.filter(v => v !== '')
   logger.log('info', 'Message Parsed', {command, args, type})
 
@@ -95,7 +97,8 @@ bot.on('message', async message => {
     message.channel.send(':mega: Yes ?')
     return
   }
-    // Run the command
+
+  // Run the command
   if (command === 'uptime') {
     message.channel.send(`:mega: I've been alive for ${botUtils.getUptime()}`)
     return
@@ -120,8 +123,8 @@ bot.on('message', async message => {
       },
       timestamp: new Date(),
       fields: [
-          {name: 'Servers', value: bot.guilds.cache.size, inline: true},
-          {name: 'Users', value: bot.users.cache.size, inline: true}
+        {name: 'Servers', value: bot.guilds.cache.size, inline: true},
+        {name: 'Users', value: bot.users.cache.size, inline: true}
       ],
       footer: {text: `Online for ${botUtils.getUptime()}`}
     }})
@@ -131,30 +134,33 @@ bot.on('message', async message => {
   if (command === 'uinfo') {
     let user
 
-      // If it has mentions find the first user
+    // If it has mentions find the first user
     if (message.mentions.members.size !== 0) {
       user = message.mentions.members.find(v => v.user.toString() === args[0] || `<@!${v.user.id}>` === args[0])
     }
-      // If user not found using mentions try username
+
+    // If user not found using mentions try username
     if (!user) {
       try {
         user = await message.guild.members.fetch({auery: args.join(' '), limit: 1})
         user = user.first()
-      } catch (e) {}
+      } catch {}
     }
-      // No luck send not found message
+
+    // No luck send not found message
     if (!user) {
       message.channel.send(':mega: no user specified')
       return
     }
 
     const getRolesString = roles => {
-      let str = ''
+      let string = ''
       roles.forEach(v => {
-        str = str + ' ' + v.toString()
+        string = string + ' ' + v.toString()
       })
-      return str.trim()
+      return string.trim()
     }
+
     message.channel.send({embed: {
       color: user.colorRole ? user.colorRole.color : 0xFFFFFF,
       author: {
@@ -163,9 +169,9 @@ bot.on('message', async message => {
       },
       // Timestamp: new Date(),
       fields: [
-          {name: 'Id', value: user.user.id, inline: true},
-          {name: 'Joined At', value: user.joinedAt.toDateString(), inline: true},
-          {name: 'Roles', value: getRolesString(user.roles.cache)}
+        {name: 'Id', value: user.user.id, inline: true},
+        {name: 'Joined At', value: user.joinedAt.toDateString(), inline: true},
+        {name: 'Roles', value: getRolesString(user.roles.cache)}
       ]
     }})
     return
@@ -176,17 +182,18 @@ bot.on('message', async message => {
     const m = await message.channel.send(':mega: attempting to join voice channel ...')
     if (message.member.voice.channel) {
       try {
-        const connection = await message.member.voice.channel.join();
+        await message.member.voice.channel.join()
         m.edit(':mega: I have successfully connected to the channel!')
-      } catch(e) {
-        m.edit(':mega: Error encountered.\nMessage: ```' + err.message + '```')
+      } catch (error) {
+        m.edit(':mega: Error encountered.\nMessage: ```' + error.message + '```')
       }
+
       return
     }
 
     console.log(bot.voice.voiceChannels)
 
-        // If already in a channel
+    // If already in a channel
     if (bot.voice.connections.get(message.channel.guild.id)) {
       m.edit(':mega: Already in a voice channel.')
       return
@@ -200,10 +207,13 @@ bot.on('message', async message => {
           if (message.guild.afkChannelID === channel.id) {
             return false
           }
+
           return true
         }
+
         return true
       }
+
       return false
     })
 
@@ -213,13 +223,13 @@ bot.on('message', async message => {
     }
 
     voiceChannels = voiceChannels.array()
-      // Can simplify
+    // Can simplify
     const attemptJoin = async (i, attemptJoin) => {
       try {
-        await voiceChannels[i].join();
+        await voiceChannels[i].join()
         m.edit(':mega: I have successfully connected to the channel!')
-      } catch (err) {
-        logger.log('error', err)
+      } catch (error) {
+        logger.log('error', error)
         if (i === voiceChannels.length - 1) {
           m.edit(':mega: No joinable Voice Channels found!')
         } else {
@@ -238,45 +248,54 @@ bot.on('message', async message => {
       message.channel.send(':mega: Invite the bot to a voice channel first!')
       return
     }
+
     const vc = bot.voice.connections.get(message.channel.guild.id)
     const url = args[0]
     const ytdl = require('discord-ytdl-core')
-    const streamOptions = {seek: 0, type: "opus"}
-    ytdl.getInfo(url).then(() => {
-      let stream
+    const streamOptions = {seek: 0, type: 'opus'}
+    let stream
+
+    try {
+      await ytdl.getInfo(url)
+
       try {
         stream = ytdl(url, {filter: 'audioonly', opusEncoded: true, encoderArgs: ['-af', 'bass=g=10,dynaudnorm=f=200']})
-      } catch (e) {
+      } catch {
         message.channel.send(':mega: cant play this shit ' + url)
         return
       }
+
       dispatcher = vc.play(stream, streamOptions)
-    }).catch(err => {
-      logger.log('error', err)
+    } catch (error) {
+      logger.log('error', error)
       const ytseatch = require('youtube-search')
-      const opts = {
+      const options = {
         maxResults: 1,
         key: process.env.YOUTUBE_API_KEY
       }
-      ytseatch(args.join(' '), opts, (err, results) => {
+      ytseatch(args.join(' '), options, (err, results) => {
         if (err) {
           return logger.log('error', err)
         }
+
         let stream
         if (results.length === 0) {
           message.channel.send(':mega: no videos found')
           return
         }
+
         try {
           stream = ytdl(results[0].link, {filter: 'audioonly', opusEncoded: true, encoderArgs: ['-af', 'bass=g=10,dynaudnorm=f=200']})
-        } catch (e) {
+        } catch {
           message.channel.send(':mega: cant play this shit ' + url)
           return
         }
+
         message.channel.send(':mega: Playing ' + results[0].link)
         dispatcher = vc.play(stream, streamOptions)
       })
-    })
+    }
+
     return
   }
 
@@ -288,7 +307,7 @@ bot.on('message', async message => {
 
     const vc = bot.voiceConnections.get(message.channel.guild.id)
     const url = args[0].trim()
-    const urlpattern = /^(https?:\/\/)?((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(:\d+)?(\/[-a-z\d%_.~+]*)*(\?[;&a-z\d%_.~+=-]*)?$/i
+    const urlpattern = /^(https?:\/\/)?((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(:\d+)?(\/[-\w%.~+]*)*(\?[;&\w%.~+=-]*)?$/i
     if (!urlpattern.test(url)) {
       message.channel.send(':mega: nope not a valid url')
       return
@@ -302,9 +321,11 @@ bot.on('message', async message => {
     if (!dispatcher) {
       return
     }
-    if (parseInt(args[0], 10) <= 200 && parseInt(args[0], 10) >= 0) {
-      dispatcher.setVolume(parseInt(args[0], 10) / 100)
+
+    if (Number.parseInt(args[0], 10) <= 200 && Number.parseInt(args[0], 10) >= 0) {
+      dispatcher.setVolume(Number.parseInt(args[0], 10) / 100)
     }
+
     return
   }
 
@@ -312,6 +333,7 @@ bot.on('message', async message => {
     if (!dispatcher) {
       return
     }
+
     dispatcher.pause()
     return
   }
@@ -320,6 +342,7 @@ bot.on('message', async message => {
     if (!dispatcher) {
       return
     }
+
     dispatcher.resume()
   }
 })

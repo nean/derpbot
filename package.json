@@ -8,7 +8,7 @@
     "npm": "6.14.5"
   },
   "scripts": {
-    "test": "xo && ava"
+    "test": "xo"
   },
   "author": "Neranjen",
   "license": "ISC",
@@ -31,8 +31,6 @@
     "semicolon": false
   },
   "devDependencies": {
-    "ava": "^3.9.0",
-    "nyc": "^15.1.0",
     "xo": "^0.32.0"
   }
 }
