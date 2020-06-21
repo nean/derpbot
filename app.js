@@ -224,7 +224,7 @@ bot.on('message', async message => {
 
     voiceChannels = voiceChannels.array()
     // Can simplify
-    const attemptJoin = async (i, attemptJoin) => {
+    const attemptJoin = async (i) => {
       try {
         await voiceChannels[i].join()
         m.edit(':mega: I have successfully connected to the channel!')
@@ -278,7 +278,6 @@ bot.on('message', async message => {
           return logger.log('error', err)
         }
 
-        let stream
         if (results.length === 0) {
           message.channel.send(':mega: no videos found')
           return
@@ -296,24 +295,6 @@ bot.on('message', async message => {
       })
     }
 
-    return
-  }
-
-  if (command === 'playfile') {
-    if (bot.voiceConnections.size === 0) {
-      message.channel.send(':mega: Invite the bot to a voice channel first!')
-      return
-    }
-
-    const vc = bot.voiceConnections.get(message.channel.guild.id)
-    const url = args[0].trim()
-    const urlpattern = /^(https?:\/\/)?((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(:\d+)?(\/[-\w%.~+]*)*(\?[;&\w%.~+=-]*)?$/i
-    if (!urlpattern.test(url)) {
-      message.channel.send(':mega: nope not a valid url')
-      return
-    }
-
-    dispatcher = vc.playArbitraryInput(url)
     return
   }
 
