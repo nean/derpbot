@@ -224,7 +224,7 @@ bot.on('message', async message => {
 
     voiceChannels = voiceChannels.array()
     // Can simplify
-    const attemptJoin = async (i) => {
+    const attemptJoin = async i => {
       try {
         await voiceChannels[i].join()
         m.edit(':mega: I have successfully connected to the channel!')
