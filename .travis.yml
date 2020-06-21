@@ -5,8 +5,14 @@ os: "linux"
 dist: bionic
 install:
   - npm install
-script:
-  - xo
 cache:
   directories:
     - "node_modules"
+addons:
+  sonarcloud:
+    organization: "nean"
+    token:
+      secure: "IKCNNDTZ06mN5vJRbrNVF62H9OmYpQpXwCiVgkop4SUZHl/azuGX+IXhOXWRoXhSo94YuqYEm0ONTMvAyoJ7LWsYK+q0+t89lF7hiobtw+PPqQYo5Ee4uHk1o8gs8l7QsdgDXE7HpTxbxY+F6Cnz/pgXFEBRaRoJs+o+4Tq5St2LQHXKR1qehkRtupig20bai5YEfC4kkZPvBE2eM/KAxYeCByicvpf8Z9AHy9PFugBWpDenCgHPqplXqi7SlG/iutenHtZ3G2AKB0HRfEWFhI6l4JPISg+wuH2SMxzS0p/ItCwkfNuyyBt1YZpRi1T7m373/agG1LbedYCg6H4QBgsIdOOtm3UXO1Ey/AD0XVzIGi2PXkedjphTVBUcyPJ3YlmXoYB/8f0eQDPsw1lwbLvMl2eZqIAvnfaGeyHUOKzeZlsFEDK/OhDZVx5YI1Z9TKafBU+TI9zE3kalzCasX8Kag5eIIbXQqLaPjZT3D1CxFtwRB29GEJ4b6aHKwy3aJZi5aIe95EVHGp/a+XcQfp1a5IhLY2wL1Phrh89QtR3tAIiVyLWy6+b9n121oSaZtDRekQ1nsQdXBBmsqXEvTaLKxdcfSjxd1h+3QpLLaf6/YsPn1jJPxskTpJc4VlEGpto/t/BFKyqACyF1cWdkqtKcd+X3altXX9iQVYLYwsg="
+script:
+  - xo
+  - sonar-scanner
