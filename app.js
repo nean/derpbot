@@ -4,13 +4,8 @@ const {createLogger: CreateLogger, transports: {Console: ConsoleTransport}} = re
 const botUtils = require('./util.js')
 const {format} = require('winston')
 
-let config
-
-if (process.env.NODE_ENV === 'production') {
-  config = require('./config/config-prod.json')
-} else {
-  config = require('./config/config-dev.json')
-}
+const configFile = process.env.NODE_ENV === 'production' ? './config/config-prod.json' : './config/config-dev.json'
+const config = require(configFile)
 
 const {prefix} = config.bot
 
@@ -154,11 +149,7 @@ bot.on('message', async message => {
     }
 
     const getRolesString = roles => {
-      let string = ''
-      roles.forEach(v => {
-        string = string + ' ' + v.toString()
-      })
-      return string.trim()
+      return roles.map(r => r.toString()).join(' ')
     }
 
     message.channel.send({embed: {
@@ -273,9 +264,9 @@ bot.on('message', async message => {
         maxResults: 1,
         key: process.env.YOUTUBE_API_KEY
       }
-      ytseatch(args.join(' '), options, (err, results) => {
-        if (err) {
-          return logger.log('error', err)
+      ytseatch(args.join(' '), options, (error, results) => {
+        if (error) {
+          return logger.log('error', error)
         }
 
         if (results.length === 0) {
