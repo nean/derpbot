@@ -15,7 +15,7 @@
   "dependencies": {
     "@discordjs/opus": "^0.4.0",
     "bufferutil": "^4.0.3",
-    "discord-ytdl-core": "^5.0.0",
+    "discord-ytdl-core": "^5.0.1",
     "discord.js": "^12.5.1",
     "erlpack": "github:discord/erlpack",
     "ffmpeg-static": "^4.2.7",
