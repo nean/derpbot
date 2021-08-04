@@ -31,6 +31,6 @@
     "semicolon": false
   },
   "devDependencies": {
-    "xo": "^0.38.1"
+    "xo": "^0.43.0"
   }
 }
