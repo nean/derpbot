@@ -6,5 +6,5 @@ const getUptime = () => {
 }
 
 module.exports = {
-  getUptime
+  getUptime,
 }

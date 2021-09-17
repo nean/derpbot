@@ -1,11 +1,11 @@
 {
   "name": "derpbot",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Just Another Discord Bot",
   "main": "app.js",
   "engines": {
-    "node": "12.17.0",
-    "npm": "6.14.5"
+    "node": ">=16",
+    "npm": ">=7"
   },
   "scripts": {
     "test": "xo"
@@ -13,17 +13,17 @@
   "author": "Neranjen",
   "license": "ISC",
   "dependencies": {
-    "@discordjs/opus": "^0.5.3",
+    "@discordjs/opus": "^0.6.0",
+    "@discordjs/voice": "^0.6.0",
     "bufferutil": "^4.0.3",
-    "discord-ytdl-core": "^5.0.0",
-    "discord.js": "^12.5.1",
-    "erlpack": "github:discord/erlpack",
-    "ffmpeg-static": "^4.2.7",
+    "discord.js": "^13.1.0",
+    "ffmpeg-static": "^4.4.0",
+    "popyt": "^5.0.0",
     "pretty-seconds": "^1.0.1",
     "sodium": "^3.0.2",
-    "utf-8-validate": "^5.0.4",
+    "utf-8-validate": "^5.0.5",
     "winston": "^3.3.3",
-    "youtube-search": "^1.1.6",
+    "ytdl-core-discord": "^1.3.1",
     "zlib-sync": "^0.1.7"
   },
   "xo": {
@@ -31,6 +31,6 @@
     "semicolon": false
   },
   "devDependencies": {
-    "xo": "^0.38.1"
+    "xo": "^0.44.0"
   }
 }
